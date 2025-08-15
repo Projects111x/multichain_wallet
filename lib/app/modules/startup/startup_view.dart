@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:multi_chain_wallet/app/theme/app_theme.dart';
 import 'startup_controller.dart';
 
 class StartupView extends GetView<StartupController> {
@@ -8,13 +7,18 @@ class StartupView extends GetView<StartupController> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: cs.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 36),
+
+            // Brand
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28.0),
               child: RichText(
@@ -22,19 +26,17 @@ class StartupView extends GetView<StartupController> {
                   children: [
                     TextSpan(
                       text: "Crypt",
-                      style: TextStyle(
-                        fontSize: 42,
+                      style: textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        color: cs.onSurface,
                         letterSpacing: 1,
                       ),
                     ),
                     TextSpan(
                       text: "X",
-                      style: TextStyle(
-                        fontSize: 42,
+                      style: textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+                        color: cs.primary,
                         letterSpacing: 1,
                       ),
                     ),
@@ -42,7 +44,10 @@ class StartupView extends GetView<StartupController> {
                 ),
               ),
             ),
+
             const SizedBox(height: 16),
+
+            // Illustration
             Center(
               child: Image.asset(
                 'assets/images/cryptx.png',
@@ -51,7 +56,10 @@ class StartupView extends GetView<StartupController> {
                 fit: BoxFit.contain,
               ),
             ),
+
             const Spacer(),
+
+            // Copy + CTA
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28.0),
               child: Column(
@@ -59,18 +67,16 @@ class StartupView extends GetView<StartupController> {
                 children: [
                   Text(
                     'Jump start your\ncrypto portfolio',
-                    style: TextStyle(
-                      fontSize: 28,
+                    style: textTheme.headlineSmall?.copyWith(
+                      color: cs.onSurface,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     'Take your investment portfolio\nto next level',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.gray,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurface.withOpacity(0.7),
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -79,19 +85,10 @@ class StartupView extends GetView<StartupController> {
                     width: double.infinity,
                     height: 54,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                      ),
-                      onPressed: () {
-                        controller.onGetStarted();
-                      },
+                      onPressed: controller.onGetStarted,
                       child: const Text(
                         'Get Started',
                         style: TextStyle(
-                          color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),

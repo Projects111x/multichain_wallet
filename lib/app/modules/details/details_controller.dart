@@ -1,73 +1,57 @@
 import 'package:get/get.dart';
-import 'package:dio/dio.dart';
+import 'package:multi_chain_wallet/app/modules/home/home_controller.dart';
 
 class DetailsController extends GetxController {
-  final tabs = ['BTC', 'ETH', 'LTC', 'XRP'];
-  final apiIds = {
-    'BTC': 'bitcoin',
-    'ETH': 'ethereum',
-    'LTC': 'litecoin',
-    'XRP': 'ripple',
-  };
+  final tabs = <String>[].obs;
 
   var selectedTab = 0.obs;
   var chartData = <double>[].obs;
   var price = RxnDouble();
-  var amount = 2.05; 
+  var amount = 0.0;
   var selectedPercent = 25.obs;
+
+  late HomeController home;
 
   @override
   void onInit() {
     super.onInit();
-    fetchData();
+    home = Get.find<HomeController>();
+
+    for (final coin in home.holdings) {
+      final symbol = coin['symbol']!.toString().toUpperCase();
+      tabs.add(symbol);
+    }
+
+    if (tabs.isNotEmpty) {
+      amount = double.tryParse(home.holdings[0]['amount'].toString()) ?? 0.0;
+      fetchData();
+    }
+
+    ever(selectedTab, (_) => fetchData());
+    ever(home.holdings, (_) => fetchData());
   }
 
   void onTabSelected(int index) {
     selectedTab.value = index;
-    fetchData();
+    amount = double.tryParse(home.holdings[index]['amount'].toString()) ?? 0.0;
   }
 
-  Future<void> fetchData() async {
+  void fetchData() {
+    if (tabs.isEmpty) return;
+
     final symbol = tabs[selectedTab.value];
-    final apiId = apiIds[symbol]!;
-    await Future.wait([
-      fetchChart(apiId),
-      fetchPrice(apiId),
-    ]);
-  }
 
-  Future<void> fetchChart(String apiId) async {
-    try {
-      final dio = Dio();
-      final response = await dio.get(
-        'https://api.coingecko.com/api/v3/coins/$apiId/market_chart',
-        queryParameters: {
-          'vs_currency': 'usd',
-          'days': 7,
-        },
-      );
-      final prices = response.data['prices'] as List;
-      chartData.value =
-          prices.map<double>((e) => (e[1] as num).toDouble()).toList();
-    } catch (e) {
-      chartData.value = [];
+    final list = home.charts[symbol];
+    if (list != null && list.isNotEmpty) {
+      chartData.assignAll(list);
+    } else {
+      chartData.clear();
     }
-  }
 
-  Future<void> fetchPrice(String apiId) async {
-    try {
-      final dio = Dio();
-      final response = await dio.get(
-        'https://api.coingecko.com/api/v3/simple/price',
-        queryParameters: {
-          'ids': apiId,
-          'vs_currencies': 'usd',
-        },
-      );
-      price.value = (response.data[apiId]['usd'] as num?)?.toDouble();
-    } catch (e) {
-      price.value = null;
-    }
+    final coin = home.holdings.firstWhereOrNull(
+      (c) => c['symbol']?.toString().toUpperCase() == symbol,
+    );
+    price.value = double.tryParse(coin?['usd']?.toString() ?? '');
   }
 
   void onPercentSelected(int percent) {
